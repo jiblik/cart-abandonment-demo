@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דמו - סל קניות אינטראקטיבי | נטישת עגלות</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --accent: #f59e0b;
+  --danger: #ef4444;
+  --success: #10b981;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1), 0 6px 10px rgba(0,0,0,0.08);
+  --radius: 12px;
+  --hotspot: #8b5cf6;
+}
+
+body {
+  font-family: 'Heebo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== TOUR / EXPLANATION SYSTEM ===== */
+
+/* Hotspot - the pulsing numbered circle */
+.hotspot {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--hotspot);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 0 0 4px rgba(139,92,246,0.3);
+  animation: hotspotPulse 2s infinite;
+  transition: transform 0.2s;
+  border: 2px solid white;
+}
+.hotspot:hover { transform: scale(1.2); animation: none; }
+
+@keyframes hotspotPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(139,92,246,0.3); }
+  50% { box-shadow: 0 0 0 10px rgba(139,92,246,0.1); }
+}
+
+/* Tooltip that appears on click */
+.tooltip-card {
+  display: none;
+  position: absolute;
+  z-index: 200;
+  width: 340px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+  border: 2px solid var(--hotspot);
+  animation: tooltipIn 0.3s ease-out;
+  overflow: hidden;
+}
+.tooltip-card.show { display: block; }
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.tooltip-header {
+  background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+  color: white;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tooltip-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tooltip-header .num {
+  background: rgba(255,255,255,0.25);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+.tooltip-close {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tooltip-close:hover { background: rgba(255,255,255,0.35); }
+
+.tooltip-body {
+  padding: 16px 18px;
+}
+.tooltip-body p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.tooltip-body .highlight {
+  background: #f5f3ff;
+  border-right: 3px solid var(--hotspot);
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  margin: 10px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #5b21b6;
+}
+.tooltip-body .stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ecfdf5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #065f46;
+  font-weight: 600;
+  margin: 8px 0;
+}
+.tooltip-body .who-does {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 6px;
+}
+.tooltip-body .who-does img { width: 16px; height: 16px; border-radius: 3px; }
+
+.tooltip-footer {
+  padding: 10px 18px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+}
+.tooltip-nav {
+  display: flex;
+  gap: 6px;
+}
+.tooltip-nav button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: white;
+  cursor: pointer;
+  font-family: 'Heebo';
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.tooltip-nav button:hover { background: #f8fafc; }
+.tooltip-nav button.primary {
+  background: var(--hotspot);
+  color: white;
+  border-color: var(--hotspot);
+}
+.tooltip-nav button.primary:hover { background: #7c3aed; }
+.tooltip-counter {
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+/* Demo Control Panel */
+.demo-panel {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  color: white;
+  padding: 14px 28px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.demo-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.demo-badge {
+  background: var(--accent);
+  color: #1e293b;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.demo-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.demo-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  cursor: pointer;
+  font-family: 'Heebo';
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.demo-btn:hover { background: rgba(255,255,255,0.2); }
+.demo-btn.active { background: var(--hotspot); border-color: var(--hotspot); }
+.demo-btn.tour-btn { background: var(--accent); color: #1e293b; border-color: var(--accent); font-weight: 700; }
+.demo-btn.tour-btn:hover { background: #d97706; }
+
+/* Tour overlay dimmer */
+.tour-dimmer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 90;
+  backdrop-filter: blur(2px);
+}
+.tour-dimmer.show { display: block; }
+
+/* Highlight border for active element */
+.tour-highlight {
+  outline: 3px solid var(--hotspot) !important;
+  outline-offset: 4px;
+  border-radius: 8px;
+  position: relative;
+  z-index: 95;
+  background: white;
+}
+
+/* Header */
+.header {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo { font-size: 24px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+.cart-icon-header { position: relative; cursor: pointer; font-size: 24px; }
+.cart-count {
+  position: absolute; top: -8px; left: -8px;
+  background: var(--danger); color: white;
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+
+/* Steps */
+.steps-container { background: white; padding: 24px 32px; border-bottom: 1px solid var(--border); position: relative; }
+.steps { display: flex; align-items: center; justify-content: center; gap: 0; max-width: 700px; margin: 0 auto; }
+.step {
+  display: flex; align-items: center; gap: 8px; font-size: 14px;
+  color: var(--text-light); cursor: pointer; transition: all 0.3s;
+  padding: 8px 16px; border-radius: 8px;
+}
+.step:hover { background: #f1f5f9; }
+.step.active { color: var(--primary); font-weight: 600; }
+.step.completed { color: var(--success); }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+}
+.step.active .step-num { background: var(--primary); border-color: var(--primary); color: white; }
+.step.completed .step-num { background: var(--success); border-color: var(--success); color: white; }
+.step-line { width: 40px; height: 2px; background: var(--border); margin: 0 4px; }
+.step-line.completed { background: var(--success); }
+
+/* Main Layout */
+.main {
+  max-width: 1200px; margin: 0 auto; padding: 32px;
+  display: grid; grid-template-columns: 1fr 380px; gap: 32px;
+}
+
+/* Cart Items */
+.cart-section { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; position: relative; }
+.cart-section-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.cart-section-header h2 { font-size: 20px; font-weight: 700; }
+.cart-section-header span { color: var(--text-light); font-size: 14px; }
+
+.cart-item {
+  display: flex; gap: 16px; padding: 20px 24px;
+  border-bottom: 1px solid var(--border); transition: all 0.3s; position: relative;
+}
+.cart-item:hover { background: #f8fafc; }
+.cart-item-image {
+  width: 100px; height: 100px; border-radius: 10px;
+  background: #f1f5f9; display: flex; align-items: center; justify-content: center;
+  font-size: 40px; flex-shrink: 0;
+}
+.cart-item-details { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.cart-item-name { font-weight: 600; font-size: 16px; }
+.cart-item-variant { color: var(--text-light); font-size: 13px; }
+.cart-item-price { font-weight: 700; font-size: 18px; color: var(--primary); }
+.cart-item-original-price { text-decoration: line-through; color: var(--text-light); font-size: 14px; margin-right: 8px; }
+
+.quantity-control {
+  display: flex; align-items: center; gap: 0;
+  border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden; width: fit-content; margin-top: 8px;
+}
+.qty-btn {
+  width: 32px; height: 32px; border: none; background: #f1f5f9;
+  cursor: pointer; font-size: 16px; font-weight: 600;
+  color: var(--text); transition: background 0.2s; font-family: 'Heebo';
+}
+.qty-btn:hover { background: #e2e8f0; }
+.qty-value {
+  width: 40px; text-align: center; font-weight: 600; font-size: 14px;
+  border: none; border-right: 1px solid var(--border); border-left: 1px solid var(--border);
+  height: 32px; line-height: 32px;
+}
+
+.remove-btn {
+  position: absolute; top: 16px; left: 16px;
+  background: none; border: none; color: var(--text-light);
+  cursor: pointer; font-size: 18px; padding: 4px; border-radius: 4px;
+  transition: all 0.2s;
+}
+.remove-btn:hover { color: var(--danger); background: #fef2f2; }
+
+/* FOMO */
+.fomo-badge {
+  display: none; align-items: center; gap: 4px;
+  background: #fef2f2; color: var(--danger); font-size: 12px; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px; margin-top: 4px; width: fit-content;
+  animation: pulse 2s infinite;
+}
+.fomo-badge.show { display: inline-flex; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+.viewers-badge {
+  display: none; align-items: center; gap: 4px;
+  color: var(--text-light); font-size: 12px; margin-top: 2px;
+}
+.viewers-badge.show { display: inline-flex; }
+.viewers-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
+
+/* Summary */
+.summary { position: sticky; top: 80px; align-self: start; }
+.summary-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; position: relative; }
+.summary-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.summary-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; }
+.summary-row.total { font-size: 18px; font-weight: 700; padding-top: 16px; margin-top: 8px; border-top: 2px solid var(--border); }
+.summary-row .label { color: var(--text-light); }
+.summary-row.total .label { color: var(--text); }
+.summary-row .value { font-weight: 600; }
+.summary-row.discount .value { color: var(--success); }
+
+.coupon-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); position: relative; }
+.coupon-input-group { display: flex; gap: 8px; }
+.coupon-input {
+  flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+  font-family: 'Heebo'; font-size: 14px; direction: ltr; text-align: right;
+}
+.coupon-input:focus { outline: none; border-color: var(--primary); }
+.coupon-btn {
+  padding: 10px 18px; background: var(--text); color: white; border: none;
+  border-radius: 8px; font-family: 'Heebo'; font-weight: 600; font-size: 14px;
+  cursor: pointer; transition: background 0.2s;
+}
+.coupon-btn:hover { background: #334155; }
+.coupon-applied {
+  display: none; align-items: center; gap: 8px;
+  background: #ecfdf5; border: 1px solid #a7f3d0;
+  padding: 10px 14px; border-radius: 8px; font-size: 14px; color: #065f46; font-weight: 500;
+}
+.coupon-applied.show { display: flex; }
+.coupon-remove { margin-right: auto; cursor: pointer; color: var(--danger); font-weight: 700; }
+
+.checkout-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white; border: none; border-radius: 10px;
+  font-family: 'Heebo'; font-size: 18px; font-weight: 700;
+  cursor: pointer; margin-top: 20px; transition: all 0.3s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,0.3); }
+.secure-note { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px; font-size: 12px; color: var(--text-light); }
+
+/* Shipping */
+.shipping-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-top: 16px; position: relative; }
+.shipping-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.shipping-option {
+  display: flex; align-items: center; gap: 10px; padding: 12px;
+  border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;
+  cursor: pointer; transition: all 0.2s;
+}
+.shipping-option:hover { border-color: var(--primary); background: #eff6ff; }
+.shipping-option.selected { border-color: var(--primary); background: #eff6ff; }
+.shipping-option input[type="radio"] { accent-color: var(--primary); }
+.shipping-label { flex: 1; }
+.shipping-name { font-weight: 600; font-size: 14px; }
+.shipping-time { font-size: 12px; color: var(--text-light); }
+.shipping-price { font-weight: 700; font-size: 14px; }
+.shipping-price.free { color: var(--success); }
+
+/* Countdown */
+.countdown-card {
+  display: none; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #f59e0b; border-radius: var(--radius);
+  padding: 16px 20px; margin-top: 16px; text-align: center; position: relative;
+}
+.countdown-card.show { display: block; }
+.countdown-card .title { font-weight: 700; font-size: 15px; color: #92400e; margin-bottom: 4px; }
+.countdown-card .subtitle { font-size: 13px; color: #a16207; margin-bottom: 10px; }
+.countdown-timer { display: flex; gap: 8px; justify-content: center; }
+.countdown-unit { background: white; border-radius: 8px; padding: 6px 10px; min-width: 50px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.countdown-num { font-size: 22px; font-weight: 800; color: #92400e; line-height: 1; }
+.countdown-label { font-size: 10px; color: #a16207; }
+
+/* Popups */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); z-index: 2000;
+  backdrop-filter: blur(4px); animation: fadeIn 0.3s;
+}
+.overlay.show { display: flex; align-items: center; justify-content: center; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+.popup {
+  background: white; border-radius: 20px; max-width: 500px; width: 90%;
+  padding: 40px; text-align: center; animation: slideUp 0.4s ease-out; position: relative;
+}
+.popup-close {
+  position: absolute; top: 16px; left: 16px;
+  background: #f1f5f9; border: none; width: 32px; height: 32px;
+  border-radius: 50%; cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+.popup-close:hover { background: #e2e8f0; }
+.popup-emoji { font-size: 56px; margin-bottom: 16px; }
+.popup h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.popup p { color: var(--text-light); font-size: 15px; margin-bottom: 24px; line-height: 1.6; }
+.popup-coupon {
+  background: #f0fdf4; border: 2px dashed var(--success);
+  border-radius: 12px; padding: 16px; margin-bottom: 24px;
+}
+.popup-coupon-code { font-size: 28px; font-weight: 800; color: var(--success); letter-spacing: 4px; }
+.popup-coupon-desc { font-size: 13px; color: #065f46; margin-top: 4px; }
+.popup-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+  color: white; border: none; border-radius: 10px;
+  font-family: 'Heebo'; font-size: 16px; font-weight: 700;
+  cursor: pointer; transition: transform 0.2s;
+}
+.popup-btn:hover { transform: translateY(-2px); }
+.popup-skip {
+  margin-top: 12px; background: none; border: none; color: var(--text-light);
+  cursor: pointer; font-family: 'Heebo'; font-size: 13px; text-decoration: underline;
+}
+.popup-explain {
+  margin-top: 16px; background: #f5f3ff; border-radius: 10px; padding: 14px;
+  text-align: right; border: 1px solid #ddd6fe;
+}
+.popup-explain h5 { color: var(--hotspot); font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.popup-explain p { font-size: 12px !important; color: #5b21b6 !important; margin: 0 !important; line-height: 1.6 !important; }
+
+.email-input {
+  width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px;
+  font-family: 'Heebo'; font-size: 15px; margin-bottom: 12px; direction: ltr; text-align: center;
+}
+.email-input:focus { outline: none; border-color: var(--primary); }
+.email-input::placeholder { color: #94a3b8; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+  background: #1e293b; color: white; padding: 14px 28px; border-radius: 12px;
+  font-size: 14px; font-weight: 500; z-index: 3000; transition: bottom 0.4s ease;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2); white-space: nowrap;
+}
+.toast.show { bottom: 30px; }
+.toast.success { background: #065f46; }
+.toast.warning { background: #92400e; }
+
+/* Event Log */
+.abandon-indicator {
+  display: none; position: fixed; bottom: 30px; right: 30px;
+  background: white; border-radius: 16px; box-shadow: var(--shadow-lg);
+  padding: 20px 24px; z-index: 150; width: 360px;
+  border: 1px solid var(--border); animation: slideUp 0.4s;
+}
+.abandon-indicator.show { display: block; }
+.abandon-indicator h4 { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.abandon-log { font-size: 12px; color: var(--text-light); max-height: 200px; overflow-y: auto; }
+.abandon-log-entry { padding: 6px 0; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 6px; }
+.abandon-log-entry .time { color: var(--primary); font-weight: 600; font-size: 11px; min-width: 55px; }
+
+@media (max-width: 768px) {
+  .main { grid-template-columns: 1fr; padding: 16px; }
+  .demo-controls { display: none; }
+  .tooltip-card { width: 280px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Demo Control Panel -->
+<div class="demo-panel">
+  <div class="demo-panel-title">
+    <span class="demo-badge">DEMO</span>
+    <span>סל קניות אינטראקטיבי - הדגמה לישיבת נטישת עגלות</span>
+  </div>
+  <div class="demo-controls">
+    <button class="demo-btn tour-btn" onclick="startTour()">🎓 התחל סיור מודרך</button>
+    <button class="demo-btn active" id="btn-fomo" onclick="toggleFeature('fomo')">👁️ FOMO</button>
+    <button class="demo-btn" id="btn-countdown" onclick="toggleFeature('countdown')">⏰ שעון עצר</button>
+    <button class="demo-btn" id="btn-exit" onclick="toggleFeature('exit')">🚪 Exit Intent</button>
+    <button class="demo-btn" id="btn-email" onclick="toggleFeature('email')">📧 שמור עגלה</button>
+    <button class="demo-btn active" id="btn-log" onclick="toggleFeature('log')">📊 לוג</button>
+  </div>
+</div>
+
+<!-- Tour Dimmer -->
+<div class="tour-dimmer" id="tourDimmer"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">🛍️ MyStore</div>
+  <div style="display:flex;align-items:center;gap:24px;">
+    <span style="font-size:14px;color:var(--text-light)">שלום, ישראל</span>
+    <div class="cart-icon-header">🛒<div class="cart-count" id="headerCartCount">4</div></div>
+  </div>
+</div>
+
+<!-- Steps -->
+<div class="steps-container" id="stepsArea">
+  <div class="steps">
+    <div class="step completed" onclick="goToStep(1)"><div class="step-num">✓</div><span>סל קניות</span></div>
+    <div class="step-line completed"></div>
+    <div class="step active" onclick="goToStep(2)"><div class="step-num">2</div><span>פרטי משלוח</span></div>
+    <div class="step-line"></div>
+    <div class="step" onclick="goToStep(3)"><div class="step-num">3</div><span>תשלום</span></div>
+    <div class="step-line"></div>
+    <div class="step" onclick="goToStep(4)"><div class="step-num">4</div><span>אישור הזמנה</span></div>
+  </div>
+  <!-- Hotspot 1: Steps -->
+  <div class="hotspot" id="hs-1" style="top:12px; left:12px;" onclick="showTooltip(1)">1</div>
+  <div class="tooltip-card" id="tt-1" style="top:45px; left:12px;">
+    <div class="tooltip-header">
+      <h4><span class="num">1</span> מעקב שלבי נטישה</h4>
+      <button class="tooltip-close" onclick="hideTooltip(1)">✕</button>
+    </div>
+    <div class="tooltip-body">
+      <p><strong>מה זה?</strong> כל שלב בתהליך הקנייה (סל → משלוח → תשלום → אישור) הוא נקודה שבה הלקוח יכול לנטוש.</p>
+      <div class="highlight">
+        📊 <strong>למה חשוב?</strong> אם רוב הנטישות קורות בשלב התשלום - הבעיה שם. אם בשלב ההתחברות - אולי צריך "קנייה כאורח".
+      </div>
+      <div class="stat">📈 נתון: 26% מהנוטשים עוזבים בגלל תהליך checkout ארוך מדי</div>
+      <div class="who-does">🏷️ מי עושה את זה: Amazon, KSP, ASOS</div>
+    </div>
+    <div class="tooltip-footer">
+      <span class="tooltip-counter">1 מתוך 8</span>
+      <div class="tooltip-nav">
+        <button class="primary" onclick="showTooltip(2)">הבא ←</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+  <!-- Cart Items -->
+  <div>
+    <div class="cart-section" id="cartSection">
+      <div class="cart-section-header">
+        <h2>🛒 סל הקניות שלך</h2>
+        <span id="itemCount">4 פריטים</span>
+      </div>
+
+      <!-- Item 1 -->
+      <div class="cart-item" data-id="1">
+        <div class="cart-item-image">🎧</div>
+        <div class="cart-item-details">
+          <div class="cart-item-name">אוזניות Sony WH-1000XM5</div>
+          <div class="cart-item-variant">צבע: שחור | אלחוטיות</div>
+          <div><span class="cart-item-price">₪2,499</span><span class="cart-item-original-price">₪2,899</span></div>
+          <div class="fomo-badge show" id="fomoBadge1">🔥 נשארו רק 3 במלאי!</div>
+          <div class="viewers-badge show" id="viewersBadge1"><span class="viewers-dot"></span><span>18 אנשים צופים עכשיו</span></div>
+          <div class="quantity-control">
+            <button class="qty-btn" onclick="updateQty(1, -1)">−</button>
+            <div class="qty-value" id="qty-1">1</div>
+            <button class="qty-btn" onclick="updateQty(1, 1)">+</button>
+          </div>
+        </div>
+        <button class="remove-btn" onclick="removeItem(1)">✕</button>
+      </div>
+
+      <!-- Hotspot 2: FOMO -->
+      <div class="hotspot" id="hs-2" style="top:175px; left:12px;" onclick="showTooltip(2)">2</div>
+      <div class="tooltip-card" id="tt-2" style="top:210px; left:12px;">
+        <div class="tooltip-header">
+          <h4><span class="num">2</span> FOMO - פחד להחמיץ</h4>
+          <button class="tooltip-close" onclick="hideTooltip(2)">✕</button>
+        </div>
+        <div class="tooltip-body">
+          <p><strong>מה זה FOMO?</strong> Fear Of Missing Out = פחד להחמיץ.<br>מראים ללקוח שהמוצר עלול להיגמר או שאנשים אחרים מסתכלים עליו.</p>
+          <div class="highlight">
+            🔥 <strong>"נשארו רק 3 במלאי!"</strong> - יוצר תחושת דחיפות<br>
+            👀 <strong>"18 אנשים צופים עכשיו"</strong> - יוצר Social Proof (הוכחה חברתית)
+          </div>
+          <div class="stat">📈 FOMO מגדיל המרות ב-10-20% בממוצע</div>
+          <div class="who-does">🏷️ מי עושה את זה: Booking.com (מאסטרים!), Amazon, Terminalx</div>
+        </div>
+        <div class="tooltip-footer">
+          <span class="tooltip-counter">2 מתוך 8</span>
+          <div class="tooltip-nav">
+            <button onclick="showTooltip(1)">→ הקודם</button>
+            <button class="primary" onclick="showTooltip(3)">הבא ←</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="cart-item" data-id="2">
+        <div class="cart-item-image">👕</div>
+        <div class="cart-item-details">
+          <div class="cart-item-name">חולצת פולו Ralph Lauren</div>
+          <div class="cart-item-variant">מידה: L | צבע: כחול נייבי</div>
+          <div><span class="cart-item-price">₪349</span></div>
+          <div class="fomo-badge show">נמכר 45 פעמים השבוע!</div>
+          <div class="viewers-badge show"><span class="viewers-dot"></span><span>7 אנשים צופים עכשיו</span></div>
+          <div class="quantity-control">
+            <button class="qty-btn" onclick="updateQty(2, -1)">−</button>
+            <div class="qty-value" id="qty-2">2</div>
+            <button class="qty-btn" onclick="updateQty(2, 1)">+</button>
+          </div>
+        </div>
+        <button class="remove-btn" onclick="removeItem(2)">✕</button>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="cart-item" data-id="3">
+        <div class="cart-item-image">📚</div>
+        <div class="cart-item-details">
+          <div class="cart-item-name">ספר - Atomic Habits</div>
+          <div class="cart-item-variant">כריכה רכה | אנגלית</div>
+          <div><span class="cart-item-price">₪189</span><span class="cart-item-original-price">₪220</span></div>
+          <div class="fomo-badge show">⚡ נמכר 120 פעם החודש</div>
+          <div class="viewers-badge show"><span class="viewers-dot"></span><span>4 אנשים צופים עכשיו</span></div>
+          <div class="quantity-control">
+            <button class="qty-btn" onclick="updateQty(3, -1)">−</button>
+            <div class="qty-value" id="qty-3">1</div>
+            <button class="qty-btn" onclick="updateQty(3, 1)">+</button>
+          </div>
+        </div>
+        <button class="remove-btn" onclick="removeItem(3)">✕</button>
+      </div>
+
+      <!-- Item 4 -->
+      <div class="cart-item" data-id="4">
+        <div class="cart-item-image">🔌</div>
+        <div class="cart-item-details">
+          <div class="cart-item-name">מטען אלחוטי Belkin 3-in-1</div>
+          <div class="cart-item-variant">תואם iPhone + Apple Watch + AirPods</div>
+          <div><span class="cart-item-price">₪599</span></div>
+          <div class="fomo-badge show">🔥 נשארו 5 במלאי!</div>
+          <div class="viewers-badge show"><span class="viewers-dot"></span><span>12 אנשים צופים עכשיו</span></div>
+          <div class="quantity-control">
+            <button class="qty-btn" onclick="updateQty(4, -1)">−</button>
+            <div class="qty-value" id="qty-4">1</div>
+            <button class="qty-btn" onclick="updateQty(4, 1)">+</button>
+          </div>
+        </div>
+        <button class="remove-btn" onclick="removeItem(4)">✕</button>
+      </div>
+
+      <!-- Hotspot 3: Product tracking -->
+      <div class="hotspot" id="hs-3" style="bottom:12px; left:12px;" onclick="showTooltip(3)">3</div>
+      <div class="tooltip-card" id="tt-3" style="bottom:45px; left:12px;">
+        <div class="tooltip-header">
+          <h4><span class="num">3</span> מעקב מוצרים ננטשים</h4>
+          <button class="tooltip-close" onclick="hideTooltip(3)">✕</button>
+        </div>
+        <div class="tooltip-body">
+          <p><strong>מה עוקבים?</strong> כל מוצר שנמצא בעגלה נטושה נרשם: שם המוצר, הקטגוריה, המותג, והמחיר.</p>
+          <div class="highlight">
+            🎯 <strong>למה?</strong> אם מוצר מסוים ננטש הרבה - אולי המחיר לא תחרותי.<br>
+            אם קטגוריה שלמה ננטשת - אולי יש בעיה רחבה יותר.<br>
+            נטישה לפי מותג - מזהה בעיות עם ספקים.
+          </div>
+          <p>🖱️ <strong>נסו בעצמכם:</strong> לחצו ✕ להסיר פריט ותראו בלוג מה נרשם!</p>
+        </div>
+        <div class="tooltip-footer">
+          <span class="tooltip-counter">3 מתוך 8</span>
+          <div class="tooltip-nav">
+            <button onclick="showTooltip(2)">→ הקודם</button>
+            <button class="primary" onclick="showTooltip(4)">הבא ←</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Sidebar -->
+  <div class="summary">
+    <div class="summary-card" id="summaryCard">
+      <h3>סיכום הזמנה</h3>
+      <div class="summary-row">
+        <span class="label">סכום ביניים</span>
+        <span class="value" id="subtotal">₪3,985</span>
+      </div>
+      <div class="summary-row">
+        <span class="label">משלוח</span>
+        <span class="value" id="shippingCost">₪29.90</span>
+      </div>
+      <div class="summary-row discount" id="discountRow" style="display:none">
+        <span class="label">הנחה (קופון)</span>
+        <span class="value" id="discountValue">-₪0</span>
+      </div>
+      <div class="summary-row total">
+        <span class="label">סה"כ לתשלום</span>
+        <span class="value" id="totalPrice">₪4,014.90</span>
+      </div>
+
+      <!-- Hotspot 4: Cart Value -->
+      <div class="hotspot" id="hs-4" style="top:12px; left:12px;" onclick="showTooltip(4)">4</div>
+      <div class="tooltip-card" id="tt-4" style="top:45px; left:0px;">
+        <div class="tooltip-header">
+          <h4><span class="num">4</span> שווי עגלה נטושה</h4>
+          <button class="tooltip-close" onclick="hideTooltip(4)">✕</button>
+        </div>
+        <div class="tooltip-body">
+          <p><strong>מה נאסף?</strong> שווי כספי כולל וממוצע של כל העגלות הנטושות. בדוגמה זו: ₪4,014.90 "הלכו לפח".</p>
+          <div class="highlight">
+            💰 <strong>למה חשוב?</strong> ברגע שמבינים כמה כסף "אובד" - קל יותר להצדיק השקעה במערכת שחזור.<br>
+            אם 70% מ-1,000 עגלות ננטשות ושווי ממוצע ₪400 = <strong>₪280,000 הפסד!</strong>
+          </div>
+          <div class="stat">📈 ממוצע עולמי: 70.19% שיעור נטישת עגלות</div>
+        </div>
+        <div class="tooltip-footer">
+          <span class="tooltip-counter">4 מתוך 8</span>
+          <div class="tooltip-nav">
+            <button onclick="showTooltip(3)">→ הקודם</button>
+            <button class="primary" onclick="showTooltip(5)">הבא ←</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coupon -->
+      <div class="coupon-section" id="couponArea">
+        <div class="coupon-input-group" id="couponInput">
+          <input type="text" class="coupon-input" placeholder="הכנס קוד קופון" id="couponCodeInput">
+          <button class="coupon-btn" onclick="applyCoupon()">החל</button>
+        </div>
+        <div class="coupon-applied" id="couponApplied">
+          <span>✅ קופון <strong id="appliedCode"></strong> הופעל!</span>
+          <span class="coupon-remove" onclick="removeCoupon()">✕</span>
+        </div>
+        <!-- Hotspot 5: Coupon -->
+        <div class="hotspot" id="hs-5" style="top:-8px; left:-8px;" onclick="showTooltip(5)">5</div>
+        <div class="tooltip-card" id="tt-5" style="top:30px; left:-10px;">
+          <div class="tooltip-header">
+            <h4><span class="num">5</span> קופונים ושחזור</h4>
+            <button class="tooltip-close" onclick="hideTooltip(5)">✕</button>
+          </div>
+          <div class="tooltip-body">
+            <p><strong>מה זה?</strong> קופון הנחה שנשלח ללקוח שנטש כדי לפתות אותו לחזור.</p>
+            <div class="highlight">
+              🎟️ <strong>איך עובד?</strong><br>
+              • ההודעה הראשונה (3 שעות) - בלי קופון, רק תזכורת<br>
+              • ההודעה השנייה (24 שעות) - Social Proof<br>
+              • ההודעה השלישית (72 שעות) - קופון + דחיפות!
+            </div>
+            <p>🖱️ <strong>נסו:</strong> הקלידו <code>STAY10</code> / <code>VIP20</code> / <code>WELCOME</code></p>
+            <div class="stat">📈 קופון עם תפוגה: אחוז מימוש פי 3 מקופון רגיל</div>
+            <div class="who-does">🏷️ מי עושה את זה: ASOS, Terminalx, KSP</div>
+          </div>
+          <div class="tooltip-footer">
+            <span class="tooltip-counter">5 מתוך 8</span>
+            <div class="tooltip-nav">
+              <button onclick="showTooltip(4)">→ הקודם</button>
+              <button class="primary" onclick="showTooltip(6)">הבא ←</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="checkout-btn" onclick="proceedCheckout()">המשך לתשלום →</button>
+      <div class="secure-note">🔒 תשלום מאובטח ב-SSL</div>
+    </div>
+
+    <!-- Shipping -->
+    <div class="shipping-card" id="shippingArea">
+      <h4>🚚 אפשרויות משלוח</h4>
+      <div class="shipping-option selected" onclick="selectShipping(this, 29.90, 'רגיל')">
+        <input type="radio" name="shipping" checked>
+        <div class="shipping-label"><div class="shipping-name">משלוח רגיל</div><div class="shipping-time">3-5 ימי עסקים</div></div>
+        <div class="shipping-price">₪29.90</div>
+      </div>
+      <div class="shipping-option" onclick="selectShipping(this, 49.90, 'מהיר')">
+        <input type="radio" name="shipping">
+        <div class="shipping-label"><div class="shipping-name">משלוח מהיר</div><div class="shipping-time">1-2 ימי עסקים</div></div>
+        <div class="shipping-price">₪49.90</div>
+      </div>
+      <div class="shipping-option" onclick="selectShipping(this, 0, 'איסוף עצמי')">
+        <input type="radio" name="shipping">
+        <div class="shipping-label"><div class="shipping-name">איסוף עצמי</div><div class="shipping-time">מוכן תוך שעתיים</div></div>
+        <div class="shipping-price free">חינם!</div>
+      </div>
+      <!-- Hotspot 6: Shipping -->
+      <div class="hotspot" id="hs-6" style="top:12px; left:12px;" onclick="showTooltip(6)">6</div>
+      <div class="tooltip-card" id="tt-6" style="top:45px; left:0;">
+        <div class="tooltip-header">
+          <h4><span class="num">6</span> נטישה לפי משלוח</h4>
+          <button class="tooltip-close" onclick="hideTooltip(6)">✕</button>
+        </div>
+        <div class="tooltip-body">
+          <p><strong>מה נאסף?</strong> באיזה אפשרות משלוח הלקוח בחר לפני שנטש. אם בחר "מהיר" ונטש - אולי ₪49.90 יקר מדי.</p>
+          <div class="highlight">
+            🚚 <strong>תובנות:</strong><br>
+            • הרבה נטישות ב"משלוח רגיל"? אולי 5 ימים זה יותר מדי<br>
+            • הרבה בוחרים "איסוף עצמי"? אולי צריך יותר נקודות איסוף<br>
+            • משלוח חינם מעל סכום מסוים יכול להקטין נטישות ב-30%!
+          </div>
+          <p>🖱️ <strong>נסו:</strong> לחצו על אפשרויות משלוח שונות ותראו בלוג</p>
+        </div>
+        <div class="tooltip-footer">
+          <span class="tooltip-counter">6 מתוך 8</span>
+          <div class="tooltip-nav">
+            <button onclick="showTooltip(5)">→ הקודם</button>
+            <button class="primary" onclick="showTooltip(7)">הבא ←</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Countdown -->
+    <div class="countdown-card" id="countdownCard">
+      <div class="title">⏰ הקופון שלך פג בקרוב!</div>
+      <div class="subtitle">10% הנחה - הזדמנות אחרונה</div>
+      <div class="countdown-timer">
+        <div class="countdown-unit"><div class="countdown-num" id="cd-sec">59</div><div class="countdown-label">שניות</div></div>
+        <div class="countdown-unit"><div class="countdown-num" id="cd-min">23</div><div class="countdown-label">דקות</div></div>
+        <div class="countdown-unit"><div class="countdown-num" id="cd-hr">00</div><div class="countdown-label">שעות</div></div>
+      </div>
+      <!-- Hotspot 7: Countdown -->
+      <div class="hotspot" id="hs-7" style="top:8px; left:8px;" onclick="showTooltip(7)">7</div>
+      <div class="tooltip-card" id="tt-7" style="top:-200px; left:0;">
+        <div class="tooltip-header">
+          <h4><span class="num">7</span> שעון עצר - Urgency</h4>
+          <button class="tooltip-close" onclick="hideTooltip(7)">✕</button>
+        </div>
+        <div class="tooltip-body">
+          <p><strong>מה זה?</strong> שעון שסופר אחורה ומראה ללקוח כמה זמן נשאר עד שהקופון שלו פג תוקף.</p>
+          <div class="highlight">
+            ⏰ <strong>למה עובד?</strong> הלקוח מרגיש שאם לא יחליט עכשיו - ההנחה תיעלם. זה מפעיל "לחץ פסיכולוגי חיובי" שמזרז את ההחלטה.
+          </div>
+          <div class="stat">📈 קופון עם טיימר: אחוז המרה פי 3 מקופון ללא תפוגה</div>
+          <div class="who-does">🏷️ מי עושה: ASOS, Booking.com, חנויות Shopify מתקדמות</div>
+        </div>
+        <div class="tooltip-footer">
+          <span class="tooltip-counter">7 מתוך 8</span>
+          <div class="tooltip-nav">
+            <button onclick="showTooltip(6)">→ הקודם</button>
+            <button class="primary" onclick="showTooltip(8)">הבא ←</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Exit Intent Popup -->
+<div class="overlay" id="exitPopup">
+  <div class="popup">
+    <button class="popup-close" onclick="closePopup('exitPopup')">✕</button>
+    <div class="popup-emoji">😢</div>
+    <h2>רגע, לא לעזוב!</h2>
+    <p>ראינו שאתה עומד לצאת...<br>קיבלת קופון הנחה מיוחד רק בשבילך!</p>
+    <div class="popup-coupon">
+      <div class="popup-coupon-code">STAY10</div>
+      <div class="popup-coupon-desc">10% הנחה על כל ההזמנה</div>
+    </div>
+    <button class="popup-btn" onclick="applyExitCoupon()">🎉 רוצה את ההנחה!</button>
+    <button class="popup-skip" onclick="closePopup('exitPopup')">לא תודה, אני ממשיך הלאה</button>
+    <div class="popup-explain">
+      <h5>🎓 מה קורה כאן?</h5>
+      <p>זהו <strong>Exit Intent Popup</strong> - פופאפ שמזהה שהלקוח עומד לעזוב את האתר (העכבר זז לכיוון ה-X) ומציע הנחה ברגע האחרון. מציל 5-15% מהנוטשים! משמש ב-Terminalx, Booking.com ועוד.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Email Popup -->
+<div class="overlay" id="emailPopup">
+  <div class="popup">
+    <button class="popup-close" onclick="closePopup('emailPopup')">✕</button>
+    <div class="popup-emoji">📧</div>
+    <h2>נשמור לך את העגלה?</h2>
+    <p>השאר את המייל שלך ונשלח לך קישור<br>לחזור לעגלה בכל זמן שנוח לך</p>
+    <input type="email" class="email-input" placeholder="your@email.com" id="saveEmail">
+    <button class="popup-btn" style="background:linear-gradient(135deg,var(--primary),var(--primary-dark))" onclick="saveCart()">שלח לי את העגלה 📩</button>
+    <button class="popup-skip" onclick="closePopup('emailPopup')">לא עכשיו</button>
+    <div class="popup-explain">
+      <h5>🎓 מה קורה כאן?</h5>
+      <p>זהו <strong>"שמור עגלה" Popup</strong> - גם אם הלקוח לא רשום, אנחנו תופסים את המייל שלו! ככה אפשר לשלוח לו תזכורות אחר כך. מגדיל את רשימת התפוצה ואת סיכויי השחזור.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Event Log -->
+<div class="abandon-indicator show" id="eventLog">
+  <h4>📊 לוג אירועים (Analytics) <span style="font-size:11px;font-weight:400;color:var(--text-light)">- מה המערכת אוספת</span></h4>
+  <div class="abandon-log" id="logEntries">
+    <div class="abandon-log-entry"><span class="time">00:00</span><span>📦 4 פריטים בסל | שווי: ₪3,985 | לקוח: ותיק</span></div>
+    <div class="abandon-log-entry"><span class="time">00:00</span><span>🛒 לקוח נכנס לעגלה | מכשיר: 💻 דסקטופ | עיר: תל אביב</span></div>
+  </div>
+  <!-- Hotspot 8: Log -->
+  <div class="hotspot" id="hs-8" style="top:8px; left:8px;" onclick="showTooltip(8)">8</div>
+  <div class="tooltip-card" id="tt-8" style="bottom:40px; left:0;">
+    <div class="tooltip-header">
+      <h4><span class="num">8</span> לוג אירועים = הנתונים שלנו</h4>
+      <button class="tooltip-close" onclick="hideTooltip(8)">✕</button>
+    </div>
+    <div class="tooltip-body">
+      <p><strong>מה זה?</strong> כל פעולה שהלקוח עושה (או לא עושה) נרשמת. זה הליבה של מערכת האנליטיקס.</p>
+      <div class="highlight">
+        📊 <strong>מה נאסף?</strong><br>
+        • מכשיר (נייד/מחשב) + עיר<br>
+        • כל שינוי כמות / הסרת מוצר<br>
+        • בחירת משלוח ותשלום<br>
+        • ניסיונות קופון (הצלחה/כישלון)<br>
+        • זמן שהייה בעגלה<br>
+        • חוסר פעילות = אזהרת נטישה!
+      </div>
+      <p>🖱️ <strong>נסו:</strong> עשו פעולות בעגלה ותראו הכל נרשם כאן בזמן אמת!</p>
+    </div>
+    <div class="tooltip-footer">
+      <span class="tooltip-counter">8 מתוך 8</span>
+      <div class="tooltip-nav">
+        <button onclick="showTooltip(7)">→ הקודם</button>
+        <button class="primary" onclick="endTour()">✓ סיום</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+let cart = {
+  1: { qty: 1, price: 2499, name: 'אוזניות Sony WH-1000XM5', category: 'אלקטרוניקה', brand: 'Sony' },
+  2: { qty: 2, price: 349, name: 'חולצת פולו Ralph Lauren', category: 'אופנה', brand: 'Ralph Lauren' },
+  3: { qty: 1, price: 189, name: 'ספר - Atomic Habits', category: 'ספרים', brand: 'Generic' },
+  4: { qty: 1, price: 599, name: 'מטען אלחוטי Belkin 3-in-1', category: 'אלקטרוניקה', brand: 'Belkin' }
+};
+let shipping = 29.90, couponDiscount = 0, couponCode = '', startTime = Date.now();
+let exitShown = false, emailShown = false;
+let features = { fomo: true, countdown: false, exit: false, email: false, log: true };
+let activeTT = null;
+
+// ===== TOUR SYSTEM =====
+function showTooltip(n) {
+  // Close previous
+  if (activeTT && activeTT !== n) hideTooltip(activeTT);
+
+  let tt = document.getElementById('tt-' + n);
+  let hs = document.getElementById('hs-' + n);
+  if (!tt) return;
+
+  // If countdown tooltip and countdown is hidden, show it
+  if (n === 7) {
+    document.getElementById('countdownCard').classList.add('show');
+    features.countdown = true;
+    document.getElementById('btn-countdown').classList.add('active');
+  }
+
+  tt.classList.add('show');
+  activeTT = n;
+
+  // Scroll hotspot into view
+  hs.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  logEvent('🎓 הסבר #' + n + ' נפתח');
+}
+
+function hideTooltip(n) {
+  let tt = document.getElementById('tt-' + n);
+  if (tt) tt.classList.remove('show');
+  if (activeTT === n) activeTT = null;
+}
+
+function startTour() {
+  showToast('🎓 מתחילים סיור! לחצו על העיגולים הסגולים לקרוא הסברים', 'success');
+  logEvent('🎓 סיור מודרך התחיל');
+  showTooltip(1);
+}
+
+function endTour() {
+  hideTooltip(8);
+  showToast('✅ סיימתם את הסיור! עכשיו נסו בעצמכם - שחקו עם הסל', 'success');
+  logEvent('🎓 סיור מודרך הסתיים');
+}
+
+// ===== FEATURES =====
+function toggleFeature(name) {
+  features[name] = !features[name];
+  document.getElementById('btn-' + name).classList.toggle('active', features[name]);
+
+  if (name === 'fomo') {
+    document.querySelectorAll('.fomo-badge, .viewers-badge').forEach(el => el.classList.toggle('show', features.fomo));
+    logEvent(features.fomo ? '👁️ FOMO מופעל' : '👁️ FOMO כבוי');
+  }
+  if (name === 'countdown') {
+    document.getElementById('countdownCard').classList.toggle('show', features.countdown);
+    logEvent(features.countdown ? '⏰ שעון עצר מופעל' : '⏰ שעון עצר כבוי');
+  }
+  if (name === 'exit') logEvent(features.exit ? '🚪 Exit Intent מופעל - הזיזו עכבר מעל הדף' : '🚪 Exit Intent כבוי');
+  if (name === 'email') logEvent(features.email ? '📧 שמור עגלה מופעל' : '📧 שמור עגלה כבוי');
+  if (name === 'log') document.getElementById('eventLog').classList.toggle('show', features.log);
+}
+
+// ===== CART LOGIC =====
+function recalc() {
+  let subtotal = 0, itemCount = 0;
+  Object.values(cart).forEach(item => { subtotal += item.price * item.qty; itemCount += item.qty; });
+  let discount = couponDiscount > 0 ? Math.round(subtotal * couponDiscount) : 0;
+  let total = subtotal - discount + shipping;
+  document.getElementById('subtotal').textContent = '₪' + subtotal.toLocaleString();
+  document.getElementById('shippingCost').textContent = shipping === 0 ? 'חינם!' : '₪' + shipping.toFixed(2);
+  document.getElementById('totalPrice').textContent = '₪' + total.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('itemCount').textContent = itemCount + ' פריטים';
+  document.getElementById('headerCartCount').textContent = itemCount;
+  if (discount > 0) { document.getElementById('discountRow').style.display = 'flex'; document.getElementById('discountValue').textContent = '-₪' + discount.toLocaleString(); }
+  else document.getElementById('discountRow').style.display = 'none';
+}
+
+function updateQty(id, delta) {
+  if (!cart[id]) return;
+  let nq = cart[id].qty + delta;
+  if (nq < 1) return removeItem(id);
+  cart[id].qty = nq;
+  document.getElementById('qty-' + id).textContent = nq;
+  recalc();
+  logEvent('🔄 שינוי כמות: ' + cart[id].name + ' → ' + nq);
+}
+
+function removeItem(id) {
+  if (!cart[id]) return;
+  let {name, category, brand} = cart[id];
+  delete cart[id];
+  let el = document.querySelector(`.cart-item[data-id="${id}"]`);
+  if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(-100px)'; el.style.transition = 'all 0.3s'; setTimeout(() => el.remove(), 300); }
+  recalc();
+  logEvent('🗑️ הסרה: ' + name + ' | קטגוריה: ' + category + ' | מותג: ' + brand);
+  showToast('🗑️ ' + name + ' הוסר מהסל');
+}
+
+function selectShipping(el, price, name) {
+  document.querySelectorAll('.shipping-option').forEach(o => { o.classList.remove('selected'); o.querySelector('input').checked = false; });
+  el.classList.add('selected'); el.querySelector('input').checked = true;
+  shipping = price; recalc();
+  logEvent('🚚 בחירת משלוח: ' + name + ' | ₪' + price);
+}
+
+function applyCoupon() {
+  let code = document.getElementById('couponCodeInput').value.trim().toUpperCase();
+  if (!code) return;
+  let valid = { 'STAY10': 0.10, 'SAVE15': 0.15, 'VIP20': 0.20, 'WELCOME': 0.05 };
+  if (valid[code]) {
+    couponDiscount = valid[code]; couponCode = code;
+    document.getElementById('couponInput').style.display = 'none';
+    document.getElementById('couponApplied').classList.add('show');
+    document.getElementById('appliedCode').textContent = code;
+    recalc();
+    showToast('🎉 קופון ' + code + ' הופעל! ' + (couponDiscount*100) + '% הנחה', 'success');
+    logEvent('🎟️ קופון הופעל: ' + code + ' | הנחה: ' + (couponDiscount*100) + '%');
+  } else {
+    showToast('❌ קוד קופון לא תקף', 'warning');
+    logEvent('❌ ניסיון קופון נכשל: ' + code);
+  }
+}
+
+function removeCoupon() {
+  couponDiscount = 0; couponCode = '';
+  document.getElementById('couponInput').style.display = 'flex';
+  document.getElementById('couponApplied').classList.remove('show');
+  document.getElementById('couponCodeInput').value = '';
+  recalc(); logEvent('🎟️ קופון הוסר');
+}
+
+function applyExitCoupon() {
+  document.getElementById('couponCodeInput').value = 'STAY10';
+  closePopup('exitPopup');
+  applyCoupon();
+  logEvent('🚪✅ לקוח קיבל קופון Exit Intent וחזר!');
+}
+
+function saveCart() {
+  let email = document.getElementById('saveEmail').value;
+  if (!email || !email.includes('@')) { showToast('❌ נא להזין מייל תקין', 'warning'); return; }
+  closePopup('emailPopup');
+  showToast('📧 העגלה נשמרה! נשלח קישור ל-' + email, 'success');
+  logEvent('📧 מייל נתפס: ' + email + ' | עגלה נשמרה לשחזור');
+}
+
+function proceedCheckout() {
+  logEvent('💳 לחץ "המשך לתשלום" | זמן בעגלה: ' + getElapsedTime());
+  showToast('✅ עובר לעמוד תשלום...');
+  goToStep(3);
+}
+
+function goToStep(step) {
+  let names = {1:'סל קניות', 2:'פרטי משלוח', 3:'תשלום', 4:'אישור'};
+  document.querySelectorAll('.step').forEach((s, i) => { s.classList.remove('active','completed'); if (i+1 < step) s.classList.add('completed'); if (i+1 === step) s.classList.add('active'); });
+  document.querySelectorAll('.step-line').forEach((l, i) => l.classList.toggle('completed', i+1 < step));
+  logEvent('📍 מעבר לשלב: ' + names[step]);
+}
+
+// Exit Intent
+document.addEventListener('mouseleave', e => {
+  if (e.clientY < 10) {
+    if (features.exit && !exitShown && !couponCode) {
+      document.getElementById('exitPopup').classList.add('show'); exitShown = true;
+      logEvent('🚪 Exit Intent זוהה! מציג פופאפ הנחה');
+    } else if (features.email && !emailShown && (exitShown || !features.exit)) {
+      document.getElementById('emailPopup').classList.add('show'); emailShown = true;
+      logEvent('📧 מציג פופאפ שמירת עגלה');
+    }
+  }
+});
+
+function closePopup(id) { document.getElementById(id).classList.remove('show'); }
+
+function showToast(msg, type) {
+  let t = document.getElementById('toast'); t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function logEvent(msg) {
+  let log = document.getElementById('logEntries');
+  let entry = document.createElement('div');
+  entry.className = 'abandon-log-entry';
+  entry.innerHTML = `<span class="time">${getElapsedTime()}</span><span>${msg}</span>`;
+  log.insertBefore(entry, log.firstChild);
+}
+
+function getElapsedTime() {
+  let d = Math.floor((Date.now() - startTime) / 1000);
+  return Math.floor(d/60).toString().padStart(2,'0') + ':' + (d%60).toString().padStart(2,'0');
+}
+
+// Countdown timer
+let cdMin = 23, cdSec = 59;
+setInterval(() => {
+  if (!features.countdown) return;
+  cdSec--; if (cdSec < 0) { cdSec = 59; cdMin--; } if (cdMin < 0) { cdMin = 0; cdSec = 0; }
+  document.getElementById('cd-min').textContent = cdMin.toString().padStart(2,'0');
+  document.getElementById('cd-sec').textContent = cdSec.toString().padStart(2,'0');
+}, 1000);
+
+// Simulate viewer counts
+setInterval(() => {
+  if (!features.fomo) return;
+  document.querySelectorAll('.viewers-badge span:last-child').forEach(el => {
+    let m = el.textContent.match(/(\d+)/);
+    if (m) { let n = Math.max(2, parseInt(m[1]) + Math.floor(Math.random()*5) - 2); el.textContent = n + ' אנשים צופים עכשיו'; }
+  });
+}, 5000);
+
+// Inactivity detection
+let inactivityTimer;
+function resetInactivity() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(() => logEvent('⚠️ חוסר פעילות 30 שניות - סיכון נטישה!'), 30000);
+}
+document.addEventListener('mousemove', resetInactivity);
+document.addEventListener('click', resetInactivity);
+resetInactivity();
+
+logEvent('💡 טיפ: לחצו "סיור מודרך" למעלה או על עיגולים סגולים להסברים');
+</script>
+</body>
+</html>
