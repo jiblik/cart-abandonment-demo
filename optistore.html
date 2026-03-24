@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optistore - סל קניות | דמו נטישת עגלות</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --opti-blue: #0d6efd;
+  --opti-dark: #1a1a2e;
+  --opti-light-blue: #e8f0fe;
+  --opti-green: #28a745;
+  --opti-red: #dc3545;
+  --opti-gray: #6c757d;
+  --opti-border: #dee2e6;
+  --opti-bg: #f5f5f5;
+  --hotspot: #8b5cf6;
+}
+
+body {
+  font-family: 'Heebo', sans-serif;
+  background: var(--opti-bg);
+  color: #333;
+  min-height: 100vh;
+}
+
+/* ===== DEMO PANEL ===== */
+.demo-panel {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  color: white;
+  padding: 12px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.demo-panel-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.demo-badge {
+  background: #f59e0b;
+  color: #1e293b;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.demo-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.demo-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  cursor: pointer;
+  font-family: 'Heebo';
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.demo-btn:hover { background: rgba(255,255,255,0.2); }
+.demo-btn.active { background: var(--hotspot); border-color: var(--hotspot); }
+.demo-btn.tour-btn { background: #f59e0b; color: #1e293b; border-color: #f59e0b; font-weight: 700; }
+.demo-btn.tour-btn:hover { background: #d97706; }
+.page-switch {
+  display: flex;
+  gap: 4px;
+  margin-right: 12px;
+  border-right: 1px solid rgba(255,255,255,0.2);
+  padding-right: 12px;
+}
+.page-switch a {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: all 0.2s;
+}
+.page-switch a:hover { color: white; border-color: rgba(255,255,255,0.4); }
+.page-switch a.active-page { background: white; color: #1e1b4b; border-color: white; }
+
+/* ===== OPTISTORE HEADER ===== */
+.opti-topbar {
+  background: var(--opti-dark);
+  color: white;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.opti-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.opti-phone { font-size: 16px; font-weight: 600; direction: ltr; }
+.opti-icons { display: flex; gap: 12px; font-size: 20px; }
+.opti-logo-area {
+  background: white;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--opti-border);
+}
+.opti-logo {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--opti-dark);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.opti-logo span { color: var(--opti-blue); }
+.opti-logo sub { font-size: 10px; color: var(--opti-gray); font-weight: 400; vertical-align: super; }
+.opti-features {
+  display: flex;
+  gap: 28px;
+  font-size: 13px;
+  color: #555;
+}
+.opti-features .feat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.opti-features .feat-icon { font-size: 22px; }
+
+/* Nav */
+.opti-nav {
+  background: var(--opti-blue);
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+.opti-nav a {
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.opti-nav a:hover { background: rgba(255,255,255,0.15); }
+.opti-nav a.home-icon { padding: 10px 16px; }
+
+/* ===== CART CONTENT ===== */
+.cart-container {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+.cart-box {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  padding: 24px 28px;
+  position: relative;
+}
+.cart-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #333;
+}
+.cart-subtitle {
+  text-align: left;
+  font-size: 15px;
+  color: var(--opti-blue);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* Product Row */
+.product-row {
+  display: flex;
+  align-items: center;
+  padding: 18px 0;
+  border-top: 1px solid #eee;
+  gap: 16px;
+  position: relative;
+}
+.product-image {
+  width: 140px;
+  height: 90px;
+  border-radius: 6px;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  flex-shrink: 0;
+  border: 1px solid #eee;
+  position: relative;
+}
+.product-image .zoom {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+.product-info {
+  flex: 1;
+  text-align: right;
+}
+.product-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+.product-price-line {
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+.product-price-line .label { color: #555; }
+.product-price-line .price { font-weight: 700; }
+.product-club-line {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+.product-club-line a { color: var(--opti-blue); text-decoration: underline; font-size: 12px; }
+.product-club-price { color: var(--opti-blue); font-weight: 700; }
+.product-qty-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.product-qty-input {
+  width: 50px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+  font-family: 'Heebo';
+}
+.product-total-line {
+  font-size: 14px;
+}
+.product-total-line .total-price { font-weight: 700; }
+.product-delete {
+  position: absolute;
+  bottom: 18px;
+  right: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #999;
+  padding: 4px;
+}
+.product-delete:hover { color: var(--opti-red); }
+
+/* FOMO badges on products */
+.opti-fomo {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  background: #fff3f3;
+  color: var(--opti-red);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-top: 5px;
+  width: fit-content;
+  animation: pulse 2s infinite;
+}
+.opti-fomo.show { display: inline-flex; }
+.opti-viewers {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #888;
+  margin-top: 3px;
+}
+.opti-viewers.show { display: inline-flex; }
+.opti-viewers .dot { width: 6px; height: 6px; background: var(--opti-green); border-radius: 50%; animation: pulse 1.5s infinite; }
+
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.6 } }
+
+/* Action Buttons Row */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0 16px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.action-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  font-family: 'Heebo';
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+.action-btn.blue { background: var(--opti-blue); color: white; }
+.action-btn.blue:hover { background: #0b5ed7; }
+.action-btn.dark { background: #343a40; color: white; }
+.action-btn.dark:hover { background: #23272b; }
+
+.club-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--opti-light-blue);
+  border: 1px solid #b8d4fe;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #0d47a1;
+  font-weight: 500;
+}
+.club-banner img, .club-banner .club-icon { font-size: 32px; }
+
+/* Shipping */
+.shipping-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: right;
+  margin-bottom: 14px;
+  color: #333;
+}
+.shipping-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.ship-option {
+  border: 2px solid var(--opti-border);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  position: relative;
+}
+.ship-option:hover { border-color: var(--opti-blue); }
+.ship-option.selected { border-color: var(--opti-blue); background: #f0f7ff; }
+.ship-option .ship-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; color: #333; }
+.ship-option .ship-name .q-mark {
+  display: inline-flex;
+  width: 16px; height: 16px;
+  background: var(--opti-blue);
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  font-weight: 700;
+}
+.ship-option .ship-price { font-size: 18px; font-weight: 800; color: var(--opti-blue); margin-bottom: 4px; }
+.ship-option .ship-price.green { color: var(--opti-green); }
+.ship-option .ship-time { font-size: 11px; color: #888; line-height: 1.4; }
+.ship-option .ship-link { font-size: 12px; color: var(--opti-green); text-decoration: underline; margin-top: 6px; display: inline-block; cursor: pointer; }
+.ship-option .ship-branch { margin-top: 6px; font-size: 12px; }
+.ship-option .ship-branch select {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: 'Heebo';
+  font-size: 12px;
+}
+
+/* Total & Checkout */
+.cart-total-line {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--opti-blue);
+  margin: 16px 0 8px;
+}
+.cart-total-line .amount { font-size: 26px; }
+
+.notes-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: 'Heebo';
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: right;
+  color: #999;
+}
+
+.checkout-btn {
+  display: block;
+  width: 320px;
+  margin: 0 auto;
+  padding: 14px;
+  background: var(--opti-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Heebo';
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.checkout-btn:hover { background: #218838; transform: translateY(-1px); }
+
+/* Footer */
+.opti-footer {
+  background: var(--opti-dark);
+  color: #aaa;
+  text-align: center;
+  padding: 16px;
+  font-size: 13px;
+  margin-top: 32px;
+}
+.opti-footer span { color: var(--opti-blue); }
+
+/* ===== HOTSPOT / TOOLTIP SYSTEM ===== */
+.hotspot {
+  position: absolute;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--hotspot);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800;
+  cursor: pointer; z-index: 100;
+  box-shadow: 0 0 0 4px rgba(139,92,246,0.3);
+  animation: hsPulse 2s infinite;
+  border: 2px solid white;
+  transition: transform 0.2s;
+}
+.hotspot:hover { transform: scale(1.2); animation: none; }
+@keyframes hsPulse { 0%,100% { box-shadow:0 0 0 4px rgba(139,92,246,0.3) } 50% { box-shadow:0 0 0 10px rgba(139,92,246,0.08) } }
+
+.tooltip-card {
+  display: none;
+  position: absolute;
+  z-index: 200;
+  width: 340px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+  border: 2px solid var(--hotspot);
+  animation: ttIn 0.3s ease-out;
+  overflow: hidden;
+}
+.tooltip-card.show { display: block; }
+@keyframes ttIn { from { opacity:0; transform:translateY(8px) scale(0.96) } to { opacity:1; transform:translateY(0) scale(1) } }
+
+.tt-header {
+  background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tt-header h4 { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.tt-header .num { background: rgba(255,255,255,0.25); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.tt-close { background: rgba(255,255,255,0.2); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+.tt-close:hover { background: rgba(255,255,255,0.35); }
+.tt-body { padding: 14px 16px; }
+.tt-body p { font-size: 13px; line-height: 1.7; color: #333; margin-bottom: 8px; }
+.tt-body .hl { background: #f5f3ff; border-right: 3px solid var(--hotspot); padding: 10px 12px; border-radius: 0 8px 8px 0; margin: 8px 0; font-size: 12px; line-height: 1.7; color: #5b21b6; }
+.tt-body .stat { display: flex; align-items: center; gap: 6px; background: #ecfdf5; padding: 7px 10px; border-radius: 8px; font-size: 12px; color: #065f46; font-weight: 600; margin: 6px 0; }
+.tt-body .who { font-size: 11px; color: #888; margin-top: 4px; }
+.tt-footer { padding: 8px 16px 12px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; }
+.tt-footer .counter { font-size: 11px; color: #888; }
+.tt-nav { display: flex; gap: 5px; }
+.tt-nav button { padding: 5px 12px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-family: 'Heebo'; font-size: 12px; transition: all 0.2s; }
+.tt-nav button:hover { background: #f8f8f8; }
+.tt-nav button.primary { background: var(--hotspot); color: white; border-color: var(--hotspot); }
+.tt-nav button.primary:hover { background: #7c3aed; }
+
+/* Countdown */
+.countdown-bar {
+  display: none;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  text-align: center;
+  position: relative;
+}
+.countdown-bar.show { display: block; }
+.countdown-bar .cd-title { font-weight: 700; font-size: 14px; color: #92400e; }
+.countdown-bar .cd-sub { font-size: 12px; color: #a16207; margin-bottom: 8px; }
+.cd-timer { display: flex; gap: 8px; justify-content: center; }
+.cd-unit { background: white; border-radius: 6px; padding: 4px 10px; min-width: 48px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.cd-num { font-size: 20px; font-weight: 800; color: #92400e; }
+.cd-label { font-size: 9px; color: #a16207; }
+
+/* Popups */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; backdrop-filter:blur(4px); }
+.overlay.show { display:flex; align-items:center; justify-content:center; }
+.popup {
+  background: white; border-radius: 20px; max-width: 480px; width: 90%;
+  padding: 36px; text-align: center; animation: popIn 0.4s ease-out; position: relative;
+}
+@keyframes popIn { from { opacity:0; transform:translateY(30px) } to { opacity:1; transform:translateY(0) } }
+.popup-close { position:absolute; top:14px; left:14px; background:#f1f5f9; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; }
+.popup-close:hover { background:#e2e8f0; }
+.popup-emoji { font-size: 52px; margin-bottom: 12px; }
+.popup h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.popup p { color: #666; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
+.popup-coupon { background:#f0fdf4; border:2px dashed var(--opti-green); border-radius:12px; padding:14px; margin-bottom:20px; }
+.popup-coupon-code { font-size:26px; font-weight:800; color:var(--opti-green); letter-spacing:4px; }
+.popup-coupon-desc { font-size:12px; color:#065f46; margin-top:2px; }
+.popup-action { width:100%; padding:13px; background:linear-gradient(135deg,var(--opti-green),#218838); color:white; border:none; border-radius:10px; font-family:'Heebo'; font-size:16px; font-weight:700; cursor:pointer; }
+.popup-action:hover { transform:translateY(-1px); }
+.popup-action.blue { background:linear-gradient(135deg,var(--opti-blue),#0b5ed7); }
+.popup-skip { margin-top:10px; background:none; border:none; color:#999; cursor:pointer; font-family:'Heebo'; font-size:12px; text-decoration:underline; }
+.popup-explain { margin-top:14px; background:#f5f3ff; border-radius:10px; padding:12px; text-align:right; border:1px solid #ddd6fe; }
+.popup-explain h5 { color:var(--hotspot); font-size:12px; margin-bottom:3px; }
+.popup-explain p { font-size:11px !important; color:#5b21b6 !important; margin:0 !important; line-height:1.6 !important; }
+.email-input { width:100%; padding:12px; border:2px solid #ddd; border-radius:10px; font-family:'Heebo'; font-size:14px; margin-bottom:10px; direction:ltr; text-align:center; }
+.email-input:focus { outline:none; border-color:var(--opti-blue); }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:-100px; left:50%; transform:translateX(-50%);
+  background:#1e293b; color:white; padding:12px 24px; border-radius:10px;
+  font-size:13px; z-index:3000; transition:bottom 0.4s;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2); white-space:nowrap;
+}
+.toast.show { bottom:28px; }
+.toast.success { background:#065f46; }
+.toast.warning { background:#92400e; }
+
+/* Event Log */
+.event-log {
+  display:none; position:fixed; bottom:24px; right:24px;
+  background:white; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.12);
+  padding:16px 20px; z-index:150; width:350px; border:1px solid #e5e7eb;
+}
+.event-log.show { display:block; }
+.event-log h4 { font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:5px; }
+.log-entries { font-size:11px; color:#666; max-height:180px; overflow-y:auto; }
+.log-entry { padding:5px 0; border-bottom:1px solid #f5f5f5; display:flex; gap:6px; }
+.log-entry .time { color:var(--opti-blue); font-weight:600; font-size:10px; min-width:50px; }
+
+@media (max-width: 768px) {
+  .shipping-options { grid-template-columns: repeat(2, 1fr); }
+  .opti-features { display: none; }
+  .demo-controls { display: none; }
+  .tooltip-card { width: 280px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== DEMO PANEL ===== -->
+<div class="demo-panel">
+  <div class="demo-panel-right">
+    <span class="demo-badge">DEMO</span>
+    <span style="font-size:13px">הסל של Optistore - עם פיצ'רים של נטישת עגלות</span>
+  </div>
+  <div class="demo-controls">
+    <div class="page-switch">
+      <a href="index.html">סל כללי</a>
+      <a href="optistore.html" class="active-page">הסל שלנו</a>
+    </div>
+    <button class="demo-btn tour-btn" onclick="startTour()">🎓 סיור מודרך</button>
+    <button class="demo-btn active" id="btn-fomo" onclick="toggleFeature('fomo')">👁️ FOMO</button>
+    <button class="demo-btn" id="btn-countdown" onclick="toggleFeature('countdown')">⏰ שעון עצר</button>
+    <button class="demo-btn" id="btn-exit" onclick="toggleFeature('exit')">🚪 Exit Intent</button>
+    <button class="demo-btn" id="btn-email" onclick="toggleFeature('email')">📧 שמור עגלה</button>
+    <button class="demo-btn active" id="btn-log" onclick="toggleFeature('log')">📊 לוג</button>
+  </div>
+</div>
+
+<!-- ===== OPTISTORE HEADER ===== -->
+<div class="opti-topbar">
+  <div class="opti-topbar-right">
+    <div class="opti-icons">🛒 💬 ♡</div>
+  </div>
+  <div class="opti-phone">📞 072-3718470</div>
+</div>
+
+<div class="opti-logo-area">
+  <div class="opti-features">
+    <div class="feat"><span class="feat-icon">🕐</span> משקפיים תוך שעה</div>
+    <div class="feat"><span class="feat-icon">📅</span> קביעת בדיקת ראיה</div>
+    <div class="feat"><span class="feat-icon">⭐</span> מועדון לקוחות</div>
+    <div class="feat"><span class="feat-icon">✅</span> 100% אחריות להתאמה</div>
+  </div>
+  <div class="opti-logo">Opti<span>STORE</span><sub>.net</sub></div>
+</div>
+
+<div class="opti-nav">
+  <a href="#">מאמרים</a>
+  <a href="#">מולטיפוקל</a>
+  <a href="#">משקפי ספורט</a>
+  <a href="#">אביזרים ותמיסות</a>
+  <a href="#">עדשות מגע</a>
+  <a href="#">עדשות ראיה</a>
+  <a href="#">משקפי ראיה</a>
+  <a href="#">משקפי שמש</a>
+  <a class="home-icon" href="#">🏠</a>
+
+  <!-- Hotspot 1: Steps/Nav -->
+  <div class="hotspot" id="hs-1" style="top:6px;left:10px;" onclick="showTT(1)">1</div>
+  <div class="tooltip-card" id="tt-1" style="top:40px;left:10px;">
+    <div class="tt-header"><h4><span class="num">1</span> מעקב שלבי נטישה</h4><button class="tt-close" onclick="hideTT(1)">✕</button></div>
+    <div class="tt-body">
+      <p><strong>מה זה?</strong> אצלכם אין שלבים ויזואליים (1→2→3) בסל. הלקוח עובר ישירות מהסל לתשלום.</p>
+      <div class="hl">💡 <strong>המלצה:</strong> להוסיף Progress Bar עם שלבים (סל → משלוח → תשלום → אישור). זה מקטין נטישות כי הלקוח רואה כמה נשאר. בנוסף - עוקבים באיזה שלב הוא נטש.</div>
+      <div class="stat">📈 26% מהנוטשים עוזבים בגלל תהליך checkout ארוך מדי</div>
+    </div>
+    <div class="tt-footer"><span class="counter">1 מתוך 8</span><div class="tt-nav"><button class="primary" onclick="showTT(2)">הבא ←</button></div></div>
+  </div>
+</div>
+
+<!-- ===== CART ===== -->
+<div class="cart-container">
+  <div class="cart-box">
+    <div class="cart-title">סל קניות</div>
+    <div class="cart-subtitle">פרטי הזמנה</div>
+
+    <!-- Product 1: Vogue -->
+    <div class="product-row" data-id="1">
+      <div class="product-image">👓<div class="zoom">🔍</div></div>
+      <div class="product-info">
+        <div class="product-name">Vogue VO 4230 352 51-18-140</div>
+        <div class="product-price-line"><span class="label">מחיר: </span><span class="price">₪341.00</span></div>
+        <div class="product-club-line"><span class="product-club-price">מחיר מועדון: ₪307</span> <a href="#">להתחברות/הצטרפות למועדון</a></div>
+        <div class="product-qty-line">כמות: <input type="text" class="product-qty-input" value="1" onchange="recalc()"></div>
+        <div class="product-total-line">סה"כ מחיר: <span class="total-price">₪341.00</span></div>
+        <div class="opti-fomo show">🔥 נשארו רק 2 במלאי!</div>
+        <div class="opti-viewers show"><span class="dot"></span> 8 אנשים צופים עכשיו</div>
+      </div>
+      <button class="product-delete" title="מחק">🗑️</button>
+
+      <!-- Hotspot 2: FOMO -->
+      <div class="hotspot" id="hs-2" style="bottom:10px;left:10px;" onclick="showTT(2)">2</div>
+      <div class="tooltip-card" id="tt-2" style="bottom:45px;left:10px;">
+        <div class="tt-header"><h4><span class="num">2</span> FOMO - פחד להחמיץ</h4><button class="tt-close" onclick="hideTT(2)">✕</button></div>
+        <div class="tt-body">
+          <p><strong>מה זה?</strong> FOMO = Fear Of Missing Out. אלמנטים שיוצרים תחושת דחיפות.</p>
+          <div class="hl">🔥 <strong>"נשארו רק 2 במלאי!"</strong> - הלקוח מפחד שהמוצר ייגמר<br>👀 <strong>"8 אנשים צופים"</strong> - הלקוח רואה שאחרים מתעניינים<br><br>ב-Optistore זה רלוונטי במיוחד כי מסגרות הן יחידות ייחודיות!</div>
+          <div class="stat">📈 FOMO מגדיל המרות ב-10-20%</div>
+          <div class="who">🏷️ Booking.com, Amazon, Terminalx</div>
+        </div>
+        <div class="tt-footer"><span class="counter">2 מתוך 8</span><div class="tt-nav"><button onclick="showTT(1)">→ הקודם</button><button class="primary" onclick="showTT(3)">הבא ←</button></div></div>
+      </div>
+    </div>
+
+    <!-- Product 2: Dior -->
+    <div class="product-row" data-id="2">
+      <div class="product-image">👓<div class="zoom">🔍</div></div>
+      <div class="product-info">
+        <div class="product-name">Christian Dior DIOR 0220 J5G 58-14-150</div>
+        <div class="product-price-line"><span class="label">מחיר: </span><span class="price">₪1,686.00</span></div>
+        <div class="product-club-line"><span class="product-club-price">מחיר מועדון: ₪1,517</span> <a href="#">להתחברות/הצטרפות למועדון</a></div>
+        <div class="product-qty-line">כמות: <input type="text" class="product-qty-input" value="1" onchange="recalc()"></div>
+        <div class="product-total-line">סה"כ מחיר: <span class="total-price">₪1,686.00</span></div>
+        <div class="opti-fomo show">⚡ מסגרת מעצבים - ביקוש גבוה!</div>
+        <div class="opti-viewers show"><span class="dot"></span> 14 אנשים צופים עכשיו</div>
+      </div>
+      <button class="product-delete" title="מחק">🗑️</button>
+    </div>
+
+    <!-- Product 3: Gucci -->
+    <div class="product-row" data-id="3">
+      <div class="product-image">👓<div class="zoom">🔍</div></div>
+      <div class="product-info">
+        <div class="product-name">Gucci GG0600O 001 54-18-140</div>
+        <div class="product-price-line"><span class="label">מחיר: </span><span class="price">₪2,507.00</span></div>
+        <div class="product-club-line"><span class="product-club-price">מחיר מועדון: ₪2,256</span> <a href="#">להתחברות/הצטרפות למועדון</a></div>
+        <div class="product-qty-line">כמות: <input type="text" class="product-qty-input" value="1" onchange="recalc()"></div>
+        <div class="product-total-line">סה"כ מחיר: <span class="total-price">₪2,507.00</span></div>
+        <div class="opti-fomo show">🔥 נשארו 3 במלאי בלבד!</div>
+        <div class="opti-viewers show"><span class="dot"></span> 11 אנשים צופים עכשיו</div>
+      </div>
+      <button class="product-delete" title="מחק">🗑️</button>
+
+      <!-- Hotspot 3: Product tracking -->
+      <div class="hotspot" id="hs-3" style="top:10px;left:10px;" onclick="showTT(3)">3</div>
+      <div class="tooltip-card" id="tt-3" style="top:45px;left:10px;">
+        <div class="tt-header"><h4><span class="num">3</span> מעקב מוצרים ננטשים</h4><button class="tt-close" onclick="hideTT(3)">✕</button></div>
+        <div class="tt-body">
+          <p><strong>מה נאסף?</strong> כל מוצר שנמצא בעגלה נטושה נרשם: שם, מותג, מחיר.</p>
+          <div class="hl">🎯 <strong>דוגמה מהסל שלכם:</strong><br>
+          • Gucci ננטש 15 פעמים → אולי המחיר ₪2,507 גבוה מדי?<br>
+          • Vogue ננטש 3 פעמים → מוצר פופולרי עם נטישה נמוכה<br>
+          • Dior ננטש 8 פעמים → לבדוק אם יש תחרות על המחיר</div>
+          <div class="stat">📈 נטישה לפי מותג מזהה בעיות מחיר ספציפיות</div>
+        </div>
+        <div class="tt-footer"><span class="counter">3 מתוך 8</span><div class="tt-nav"><button onclick="showTT(2)">→ הקודם</button><button class="primary" onclick="showTT(4)">הבא ←</button></div></div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-btn blue">💎 יש לי קופון הנחה</button>
+      <button class="action-btn blue">📋 יש לי פיתקית זיכוי</button>
+      <button class="action-btn dark">🎁 יש לי Gift-card</button>
+      <button class="action-btn dark">💰 יש לי cashback</button>
+
+      <!-- Hotspot 4: Coupons -->
+      <div class="hotspot" id="hs-4" style="top:-12px;left:10px;" onclick="showTT(4)">4</div>
+      <div class="tooltip-card" id="tt-4" style="top:25px;left:10px;">
+        <div class="tt-header"><h4><span class="num">4</span> קופונים ושחזור</h4><button class="tt-close" onclick="hideTT(4)">✕</button></div>
+        <div class="tt-body">
+          <p><strong>מה יש לכם:</strong> קופון, פיתקית זיכוי, Gift Card, Cashback - מצוין! 4 סוגי הטבות.</p>
+          <div class="hl">🎟️ <strong>מה המערכת תעשה:</strong><br>
+          • לקוח נטש? שולחים לו קופון הנחה 10% אחרי 3 שעות<br>
+          • לא חזר? אחרי 24 שעות שולחים תזכורת עם "מחיר מועדון"<br>
+          • עדיין לא? אחרי 72 שעות - קופון 15% + "פג ב-24 שעות!"<br><br>
+          💡 אפשר לשלוח קופון קיים מהמערכת שלכם או ליצור דינמי</div>
+          <div class="stat">📈 קופון עם תפוגה: פי 3 מימוש מקופון רגיל</div>
+        </div>
+        <div class="tt-footer"><span class="counter">4 מתוך 8</span><div class="tt-nav"><button onclick="showTT(3)">→ הקודם</button><button class="primary" onclick="showTT(5)">הבא ←</button></div></div>
+      </div>
+    </div>
+
+    <!-- Club Banner -->
+    <div class="club-banner">
+      <span class="club-icon">🏷️</span>
+      התחברות/הצטרפות למועדון
+    </div>
+
+    <!-- Shipping -->
+    <div class="shipping-title">בחרו שיטת משלוח:</div>
+    <div class="shipping-options">
+      <div class="ship-option selected" onclick="selectShip(this,'איסוף עצמי מהסניף', 0)">
+        <div class="ship-name">איסוף עצמי מהסניף <span class="q-mark">?</span></div>
+        <div class="ship-price green">₪0</div>
+        <div class="ship-time">זמן משלוח לסניף הנבחר<br>עד 3 ימי עסקים<br>(מרגע שליחת המוצר)</div>
+        <div class="ship-branch">סניף: <select><option>נא לבחור אחד</option></select></div>
+      </div>
+      <div class="ship-option" onclick="selectShip(this,'נקודת איסוף', 0)">
+        <div class="ship-name">נקודת איסוף <span class="q-mark">?</span></div>
+        <div class="ship-price green">₪0</div>
+        <div class="ship-time">זמן משלוח לנקודת האיסוף<br>עד 7 ימי עסקים<br>(מרגע שליחת המוצר)</div>
+        <div class="ship-link">בחירת נקודת חלוקה</div>
+      </div>
+      <div class="ship-option" onclick="selectShip(this,'נקודת איסוף Express', 12)">
+        <div class="ship-name">נקודת איסוף Express <span class="q-mark">?</span></div>
+        <div class="ship-price">₪12</div>
+        <div class="ship-time">זמן משלוח לנקודת האיסוף<br>עד 3 ימי עסקים<br>(מרגע שליחת המוצר)</div>
+        <div class="ship-link">בחירת נקודת חלוקה</div>
+      </div>
+      <div class="ship-option" onclick="selectShip(this,'שליח עד הבית', 39)">
+        <div class="ship-name">שליח עד הבית <span class="q-mark">?</span></div>
+        <div class="ship-price">₪39</div>
+        <div class="ship-time">זמן משלוח עד הבית<br>עד 3 ימי עסקים<br>(מרגע שליחת המוצר)</div>
+      </div>
+
+      <!-- Hotspot 5: Shipping -->
+      <div class="hotspot" id="hs-5" style="top:-14px;left:10px;" onclick="showTT(5)">5</div>
+      <div class="tooltip-card" id="tt-5" style="top:22px;left:10px;">
+        <div class="tt-header"><h4><span class="num">5</span> נטישה לפי משלוח</h4><button class="tt-close" onclick="hideTT(5)">✕</button></div>
+        <div class="tt-body">
+          <p><strong>מה נאסף?</strong> באיזה משלוח הלקוח בחר לפני שנטש.</p>
+          <div class="hl">🚚 <strong>תובנות מהסל שלכם:</strong><br>
+          • הרבה בוחרים "שליח עד הבית" (₪39) ונוטשים? → אולי ₪39 יקר<br>
+          • הרבה בוחרים "נקודת איסוף" אבל לא ממשיכים? → אולי הרשימה לא נוחה<br>
+          • 💡 רעיון: משלוח חינם מעל ₪500 → מעודד סל גדול יותר!</div>
+        </div>
+        <div class="tt-footer"><span class="counter">5 מתוך 8</span><div class="tt-nav"><button onclick="showTT(4)">→ הקודם</button><button class="primary" onclick="showTT(6)">הבא ←</button></div></div>
+      </div>
+    </div>
+
+    <!-- Countdown -->
+    <div class="countdown-bar" id="countdownBar">
+      <div class="cd-title">⏰ הקופון שלך פג בקרוב!</div>
+      <div class="cd-sub">10% הנחה על כל ההזמנה - הזדמנות אחרונה</div>
+      <div class="cd-timer">
+        <div class="cd-unit"><div class="cd-num" id="cd-sec">59</div><div class="cd-label">שניות</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cd-min">23</div><div class="cd-label">דקות</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cd-hr">00</div><div class="cd-label">שעות</div></div>
+      </div>
+      <!-- Hotspot 7: Countdown -->
+      <div class="hotspot" id="hs-7" style="top:6px;left:6px;" onclick="showTT(7)">7</div>
+      <div class="tooltip-card" id="tt-7" style="bottom:10px;left:0;">
+        <div class="tt-header"><h4><span class="num">7</span> שעון עצר - Urgency</h4><button class="tt-close" onclick="hideTT(7)">✕</button></div>
+        <div class="tt-body">
+          <p><strong>מה זה?</strong> שעון שסופר אחורה על קופון שפג תוקף. יוצר לחץ חיובי להחלטה.</p>
+          <div class="hl">⏰ <strong>איך עובד ב-Optistore?</strong><br>לקוח נטש → קיבל קופון במייל → חוזר לאתר → רואה שעון שמראה כמה זמן נשאר. "10% הנחה - עוד 23 דקות!"</div>
+          <div class="stat">📈 קופון עם טיימר: פי 3 מימוש מקופון ללא תפוגה</div>
+        </div>
+        <div class="tt-footer"><span class="counter">7 מתוך 8</span><div class="tt-nav"><button onclick="showTT(6)">→ הקודם</button><button class="primary" onclick="showTT(8)">הבא ←</button></div></div>
+      </div>
+    </div>
+
+    <!-- Total -->
+    <div class="cart-total-line" style="position:relative">
+      סה"כ לתשלום: <span class="amount" id="totalAmount">₪4,534</span>
+
+      <!-- Hotspot 6: Total value -->
+      <div class="hotspot" id="hs-6" style="top:-8px;left:10px;" onclick="showTT(6)">6</div>
+      <div class="tooltip-card" id="tt-6" style="top:30px;left:0;">
+        <div class="tt-header"><h4><span class="num">6</span> שווי עגלה נטושה</h4><button class="tt-close" onclick="hideTT(6)">✕</button></div>
+        <div class="tt-body">
+          <p><strong>₪4,534 בעגלה הזו!</strong> עגלה אחת של Optistore שווה הרבה כסף - מסגרות מעצבים הן מוצרים יקרים.</p>
+          <div class="hl">💰 <strong>חשבון פשוט:</strong><br>
+          • 100 עגלות נטושות בחודש × ₪4,500 ממוצע = <strong>₪450,000 הפסד!</strong><br>
+          • אם נציל 10% = <strong>₪45,000 הכנסה נוספת</strong><br>
+          • זה שווה כל השקעה במערכת שחזור!</div>
+          <div class="stat">📈 ממוצע עולמי: 70% שיעור נטישה</div>
+        </div>
+        <div class="tt-footer"><span class="counter">6 מתוך 8</span><div class="tt-nav"><button onclick="showTT(5)">→ הקודם</button><button class="primary" onclick="showTT(7)">הבא ←</button></div></div>
+      </div>
+    </div>
+
+    <input class="notes-input" type="text" placeholder="ברצונכם להוסיף הערה או בקשה מיוחדת - הקלידו אותה כאן">
+
+    <button class="checkout-btn" onclick="logEv('💳 לקוח לחץ לתשלום | זמן בעגלה: '+getTime()); showToast('✅ עובר לעמוד תשלום...')">לתשלום</button>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="opti-footer">
+  © Optistore 2014-2026 - חנות המשקפיים ועדשות המגע שלכם &nbsp;|&nbsp; פיתוח: <span>שקד</span> - עיצוב ותוכנית
+</div>
+
+<!-- ===== EXIT INTENT POPUP ===== -->
+<div class="overlay" id="exitPopup">
+  <div class="popup">
+    <button class="popup-close" onclick="closePopup('exitPopup')">✕</button>
+    <div class="popup-emoji">👓</div>
+    <h2>רגע, לא לעזוב!</h2>
+    <p>המשקפיים שבחרת מחכים לך...<br>קבל קופון הנחה מיוחד על ההזמנה!</p>
+    <div class="popup-coupon">
+      <div class="popup-coupon-code">OPTI10</div>
+      <div class="popup-coupon-desc">10% הנחה על כל ההזמנה</div>
+    </div>
+    <button class="popup-action" onclick="closePopup('exitPopup');showToast('🎉 קופון OPTI10 הופעל!','success');logEv('🚪✅ לקוח קיבל קופון Exit Intent')">🎉 רוצה את ההנחה!</button>
+    <button class="popup-skip" onclick="closePopup('exitPopup')">לא תודה</button>
+    <div class="popup-explain">
+      <h5>🎓 מה קורה כאן? (Exit Intent Popup)</h5>
+      <p>ברגע שהלקוח מזיז את העכבר לכיוון ה-X לסגור, קופץ פופאפ עם הצעה. מציל 5-15% מהנוטשים. מותאם ל-Optistore עם אייקון משקפיים ומסר רלוונטי.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SAVE CART POPUP ===== -->
+<div class="overlay" id="emailPopup">
+  <div class="popup">
+    <button class="popup-close" onclick="closePopup('emailPopup')">✕</button>
+    <div class="popup-emoji">📧</div>
+    <h2>נשמור לך את המשקפיים?</h2>
+    <p>השאר את המייל שלך ונשלח לך קישור<br>לחזור לסל עם כל המשקפיים שבחרת</p>
+    <input type="email" class="email-input" placeholder="your@email.com" id="saveEmail">
+    <button class="popup-action blue" onclick="let e=document.getElementById('saveEmail').value;if(!e||!e.includes('@')){showToast('❌ נא להזין מייל תקין','warning');return;}closePopup('emailPopup');showToast('📧 נשלח קישור לעגלה ל-'+e,'success');logEv('📧 מייל נתפס: '+e)">שלח לי את העגלה 📩</button>
+    <button class="popup-skip" onclick="closePopup('emailPopup')">לא עכשיו</button>
+    <div class="popup-explain">
+      <h5>🎓 מה קורה כאן? (שמירת עגלה)</h5>
+      <p>תופסים את המייל של הלקוח גם אם הוא לא רשום! ככה אפשר לשלוח תזכורות. במיוחד חשוב ב-Optistore - לקוחות רבים צריכים זמן לחשוב על משקפיים יקרים.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EVENT LOG ===== -->
+<div class="event-log show" id="eventLog">
+  <h4>📊 לוג אירועים <span style="font-size:10px;font-weight:400;color:#888">- מה המערכת אוספת</span></h4>
+  <div class="log-entries" id="logEntries">
+    <div class="log-entry"><span class="time">00:00</span><span>📦 3 פריטים: Vogue ₪341 + Dior ₪1,686 + Gucci ₪2,507</span></div>
+    <div class="log-entry"><span class="time">00:00</span><span>🛒 כניסה לסל | מכשיר: 💻 דסקטופ | לקוח: ותיק (מועדון)</span></div>
+  </div>
+
+  <!-- Hotspot 8: Log -->
+  <div class="hotspot" id="hs-8" style="top:6px;left:6px;" onclick="showTT(8)">8</div>
+  <div class="tooltip-card" id="tt-8" style="bottom:35px;left:0;">
+    <div class="tt-header"><h4><span class="num">8</span> לוג אירועים = הנתונים</h4><button class="tt-close" onclick="hideTT(8)">✕</button></div>
+    <div class="tt-body">
+      <p><strong>מה זה?</strong> כל פעולה נרשמת. זה הליבה של מערכת האנליטיקס שתיבנה.</p>
+      <div class="hl">📊 <strong>מה נאסף מסל Optistore:</strong><br>
+      • 3 מסגרות: Vogue, Dior, Gucci (שם + מותג + מחיר)<br>
+      • סוג לקוח: מועדון/לא מועדון<br>
+      • בחירת משלוח + שינויים<br>
+      • זמן שהייה בעגלה<br>
+      • ניסיונות קופון<br>
+      • חוסר פעילות = אזהרת נטישה</div>
+      <p>🖱️ <strong>נסו:</strong> לחצו על כפתורים, שנו משלוח - הכל נרשם!</p>
+    </div>
+    <div class="tt-footer"><span class="counter">8 מתוך 8</span><div class="tt-nav"><button onclick="showTT(7)">→ הקודם</button><button class="primary" onclick="endTour()">✓ סיום</button></div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let startTime = Date.now(), exitShown = false, emailShown = false, activeTT = null;
+let features = { fomo:true, countdown:false, exit:false, email:false, log:true };
+
+function toggleFeature(n) {
+  features[n] = !features[n];
+  document.getElementById('btn-'+n).classList.toggle('active', features[n]);
+  if (n==='fomo') { document.querySelectorAll('.opti-fomo,.opti-viewers').forEach(e=>e.classList.toggle('show',features.fomo)); logEv(features.fomo?'👁️ FOMO מופעל':'👁️ FOMO כבוי'); }
+  if (n==='countdown') { document.getElementById('countdownBar').classList.toggle('show',features.countdown); logEv(features.countdown?'⏰ שעון עצר מופעל':'⏰ שעון עצר כבוי'); }
+  if (n==='exit') logEv(features.exit?'🚪 Exit Intent מופעל - הזיזו עכבר למעלה':'🚪 Exit Intent כבוי');
+  if (n==='email') logEv(features.email?'📧 שמור עגלה מופעל':'📧 שמור עגלה כבוי');
+  if (n==='log') document.getElementById('eventLog').classList.toggle('show',features.log);
+}
+
+// Tooltips
+function showTT(n) {
+  if (activeTT && activeTT!==n) hideTT(activeTT);
+  if (n===7) { document.getElementById('countdownBar').classList.add('show'); features.countdown=true; document.getElementById('btn-countdown').classList.add('active'); }
+  let t = document.getElementById('tt-'+n);
+  if (t) { t.classList.add('show'); activeTT=n; document.getElementById('hs-'+n).scrollIntoView({behavior:'smooth',block:'center'}); }
+  logEv('🎓 הסבר #'+n+' נפתח');
+}
+function hideTT(n) { let t=document.getElementById('tt-'+n); if(t) t.classList.remove('show'); if(activeTT===n) activeTT=null; }
+function startTour() { showToast('🎓 מתחילים סיור! לחצו על העיגולים הסגולים','success'); logEv('🎓 סיור מודרך התחיל'); showTT(1); }
+function endTour() { hideTT(8); showToast('✅ סיימתם! עכשיו שחקו עם הסל','success'); logEv('🎓 סיור הסתיים'); }
+
+// Shipping
+function selectShip(el, name, price) {
+  document.querySelectorAll('.ship-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  logEv('🚚 בחירת משלוח: '+name+' | ₪'+price);
+}
+
+// Exit intent
+document.addEventListener('mouseleave', e => {
+  if (e.clientY < 10) {
+    if (features.exit && !exitShown) { document.getElementById('exitPopup').classList.add('show'); exitShown=true; logEv('🚪 Exit Intent זוהה!'); }
+    else if (features.email && !emailShown && (exitShown||!features.exit)) { document.getElementById('emailPopup').classList.add('show'); emailShown=true; logEv('📧 פופאפ שמירת עגלה'); }
+  }
+});
+function closePopup(id) { document.getElementById(id).classList.remove('show'); }
+
+// Toast
+function showToast(msg,type) { let t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(type?' '+type:''); setTimeout(()=>t.classList.remove('show'),3500); }
+
+// Log
+function logEv(msg) {
+  let log=document.getElementById('logEntries');
+  let e=document.createElement('div'); e.className='log-entry';
+  e.innerHTML='<span class="time">'+getTime()+'</span><span>'+msg+'</span>';
+  log.insertBefore(e, log.firstChild);
+}
+function getTime() { let d=Math.floor((Date.now()-startTime)/1000); return Math.floor(d/60).toString().padStart(2,'0')+':'+(d%60).toString().padStart(2,'0'); }
+
+// Countdown
+let cdMin=23, cdSec=59;
+setInterval(()=>{ if(!features.countdown)return; cdSec--; if(cdSec<0){cdSec=59;cdMin--;} if(cdMin<0){cdMin=0;cdSec=0;} document.getElementById('cd-min').textContent=cdMin.toString().padStart(2,'0'); document.getElementById('cd-sec').textContent=cdSec.toString().padStart(2,'0'); },1000);
+
+// Simulate viewers
+setInterval(()=>{ if(!features.fomo)return; document.querySelectorAll('.opti-viewers span:last-child').forEach(el=>{ let m=el.textContent.match(/(\d+)/); if(m){let n=Math.max(2,parseInt(m[1])+Math.floor(Math.random()*5)-2); el.textContent=n+' אנשים צופים עכשיו';} }); },5000);
+
+// Inactivity
+let inactTimer; function resetInact(){clearTimeout(inactTimer);inactTimer=setTimeout(()=>logEv('⚠️ חוסר פעילות 30 שניות - סיכון נטישה!'),30000);}
+document.addEventListener('mousemove',resetInact); document.addEventListener('click',resetInact); resetInact();
+
+logEv('💡 לחצו "סיור מודרך" או על עיגולים סגולים להסברים');
+</script>
+</body>
+</html>
